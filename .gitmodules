@@ -1,3 +1,7 @@
 [submodule "src/zed-ros-wrapper"]
 	path = src/zed-ros-wrapper
 	url = https://github.com/stereolabs/zed-ros-wrapper.git
+
+[submodule "src/cr_control/include/cr_control/I2C"]
+	path = src/cr_control/include/cr_control/I2C
+	url = https://github.com/williamg42/I2C.git

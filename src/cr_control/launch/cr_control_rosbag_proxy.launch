@@ -7,5 +7,5 @@
 		pkg="rosbag"
 		type="record"
 		output="screen"
-		args="-O $(env HOME)/rosbagsCuberover/trial_$(arg time_now).bag /Wheel/data"/>
+		args="-O $(env HOME)/rosbagsCuberover/trial_$(arg time_now).bag /Wheel/data "/>
 </launch>

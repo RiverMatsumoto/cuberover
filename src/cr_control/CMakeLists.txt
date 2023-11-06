@@ -67,6 +67,7 @@ add_executable(
 	  src/BNO055.cpp
     include/cr_control/I2C/src/I2C.cpp
 )
+set_target_properties(test_imu PROPERTIES LINKER_LANGUAGE CXX)
 target_link_libraries(
   test_imu 
     ${catkin_LIBRARIES}
@@ -85,6 +86,7 @@ target_link_libraries(
   wheel_hardware_interface 
     ${catkin_LIBRARIES}
 )
+set_target_properties(wheel_hardware_interface PROPERTIES LINKER_LANGUAGE CXX)
 link_directories(${catkin_LIBRARY_DIRS})
 add_dependencies(wheel_hardware_interface ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
