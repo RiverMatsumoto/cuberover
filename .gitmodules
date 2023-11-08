@@ -5,3 +5,6 @@
 [submodule "src/cr_control/include/cr_control/I2C"]
 	path = src/cr_control/include/cr_control/I2C
 	url = https://github.com/williamg42/I2C.git
+[submodule "vicon_bridge"]
+	path = vicon_bridge
+	url = https://github.com/ethz-asl/vicon_bridge
