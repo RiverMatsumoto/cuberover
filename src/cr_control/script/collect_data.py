@@ -4,6 +4,7 @@ import rospy
 from cr_control.msg import trial_sample, wheel_data
 from geometry_msgs.msg import TransformStamped
 from sensor_msgs.msg import Image
+from std_msgs.msg import Header
 
 # Initialize the node and create publisher
 rospy.init_node('collect_data_node', anonymous=True)
@@ -22,12 +23,19 @@ def zed_camera_callback(msg):
 
 def vicon_bridge_callback(msg):
     global pub
+    
     trial_sample_msg = trial_sample()
+
+    header = Header()
+    header.stamp = rospy.Time.now()
+    header.frame_id = "base_link"
+
+    trial_sample_msg.header = header
     trial_sample_msg.wheel_data = last_wheel_data
     trial_sample_msg.depth = last_zed_camera_data
     trial_sample_msg.vicon = msg
-    rospy.loginfo(trial_sample_msg)
     
+    #rospy.loginfo(trial_sample_msg)
 
     pub.publish(trial_sample_msg)
 
