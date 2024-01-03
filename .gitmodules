@@ -6,5 +6,8 @@
 	path = src/cr_control/include/cr_control/I2C
 	url = https://github.com/williamg42/I2C.git
 [submodule "vicon_bridge"]
-	path = vicon_bridge
+	path = src/vicon_bridge
 	url = https://github.com/ethz-asl/vicon_bridge
+[submodule "rosbag_to_csv"]
+	path = src/rosbag_to_csv
+	url = https://github.com/AtsushiSakai/rosbag_to_csv
