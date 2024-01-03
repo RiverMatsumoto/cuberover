@@ -72,7 +72,8 @@ private:
     ros::Publisher test;
 
     // imu for gathering linear acceleration and absolute orientation
-    BNO055 imu = BNO055(-1, BNO055_ADDRESS_A, 1);
+    BNO055 imu0 = BNO055(-1, BNO055_ADDRESS_A, 7);
+    BNO055 imu1 = BNO055(0, BNO055_ADDRESS_B, 7);
 };
 
 #endif

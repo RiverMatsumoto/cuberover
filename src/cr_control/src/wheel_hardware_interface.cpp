@@ -38,7 +38,8 @@ WheelHardwareInterface::WheelHardwareInterface(ros::NodeHandle* nh, WheelHwinSet
     // store and calibrate imu
     // 0x28 is the default address for the imu
     // imu = BNO055(-1, 0x28, 1); 
-    imu.begin(imu.OPERATION_MODE_NDOF);
+    imu0.begin(imu0.OPERATION_MODE_NDOF);
+    imu1.begin(imu1.OPERATION_MODE_NDOF);
 
     this->wheelSettings = wheelSettings;
     ROS_INFO("Registering ros_control joint interfaces");
@@ -90,28 +91,65 @@ void WheelHardwareInterface::readFromWheels(Roboclaw *rb)
     msg.m2BackVelocity = encoderCountToRevolutions(rb->ReadEncoderSpeedM2(129));
 
     // Read from imu and do error checking
-    uint8_t system_status, self_test_results, system_error;
-    imu.getSystemStatus(&system_status, &self_test_results, &system_error);
-    if (system_status == 1) 
+    uint8_t system_status0, self_test_results0, system_error0;
+    imu0.getSystemStatus(&system_status0, &self_test_results0, &system_error0);
+    if (system_status0 == 1) 
     {
-        std::cout << "imu error detected... restarting imu..." << std::endl;
-        imu.begin(imu.OPERATION_MODE_NDOF);
-        std::cout << "imu restarted" << std::endl;
+        std::cout << "imu0 error detected... restarting imu..." << std::endl;
+        imu0.begin(imu0.OPERATION_MODE_NDOF);
+        std::cout << "imu0 restarted" << std::endl;
     }
-    imu::Quaternion quat = imu.getQuat();
-    imu::Vector<3> lin_accel_body_frame = imu.getVector(BNO055::VECTOR_LINEARACCEL);
-    imu::Vector<3> orientation_body_frame = imu.getVector(BNO055::VECTOR_EULER);
-    imu::Vector<3> lin_accel_ned_frame = accel_body_frame_to_ned_frame(quat.w(), quat.x(), quat.y(), quat.z(), 
-        lin_accel_body_frame.x(), lin_accel_body_frame.y(), lin_accel_body_frame.z());
-    
-    msg.xAccelImu0 = lin_accel_ned_frame.x();
-    msg.yAccelImu0 = lin_accel_ned_frame.y();
-    msg.zAccelImu0 = lin_accel_ned_frame.z();
+    uint8_t system_status1, self_test_results1, system_error1;
+    imu1.getSystemStatus(&system_status1, &self_test_results1, &system_error1);
+    if (system_status1 == 1) 
+    {
+        std::cout << "imu1 error detected... restarting imu..." << std::endl;
+        imu1.begin(imu1.OPERATION_MODE_NDOF);
+        std::cout << "imu1 restarted" << std::endl;
+    }
 
-    msg.wOrientationImu0 = quat.w();
-    msg.xOrientationImu0 = quat.x();
-    msg.yOrientationImu0 = quat.y();
-    msg.zOrientationImu0 = quat.z();
+    // collect data from imus and store in ros message
+    imu::Quaternion quat0 = imu0.getQuat();
+    imu::Vector<3> lin_accel_body_frame0 = imu0.getVector(BNO055::VECTOR_LINEARACCEL);
+    imu::Vector<3> orientation_body_frame0 = imu0.getVector(BNO055::VECTOR_EULER);
+    imu::Vector<3> lin_accel_ned_frame0 = accel_body_frame_to_ned_frame(
+        quat0.w(), 
+        quat0.x(), 
+        quat0.y(), 
+        quat0.z(), 
+        lin_accel_body_frame0.x(), 
+        lin_accel_body_frame0.y(), 
+        lin_accel_body_frame0.z());
+    
+    msg.xAccelImu0 = lin_accel_ned_frame0.x();
+    msg.yAccelImu0 = lin_accel_ned_frame0.y();
+    msg.zAccelImu0 = lin_accel_ned_frame0.z();
+
+    msg.wOrientationImu0 = quat0.w();
+    msg.xOrientationImu0 = quat0.x();
+    msg.yOrientationImu0 = quat0.y();
+    msg.zOrientationImu0 = quat0.z();
+
+    imu::Quaternion quat1 = imu1.getQuat();
+    imu::Vector<3> lin_accel_body_frame1 = imu1.getVector(BNO055::VECTOR_LINEARACCEL);
+    imu::Vector<3> orientation_body_frame1 = imu1.getVector(BNO055::VECTOR_EULER);
+    imu::Vector<3> lin_accel_ned_frame1 = accel_body_frame_to_ned_frame(
+        quat1.w(), 
+        quat1.x(), 
+        quat1.y(), 
+        quat1.z(), 
+        lin_accel_body_frame1.x(), 
+        lin_accel_body_frame1.y(), 
+        lin_accel_body_frame1.z());
+    
+    msg.xAccelImu1 = lin_accel_ned_frame1.x();
+    msg.yAccelImu1 = lin_accel_ned_frame1.y();
+    msg.zAccelImu1 = lin_accel_ned_frame1.z();
+
+    msg.wOrientationImu1 = quat1.w();
+    msg.xOrientationImu1 = quat1.x();
+    msg.yOrientationImu1 = quat1.y();
+    msg.zOrientationImu1 = quat1.z();
 
     // if (wheelSettings->debugMode) {
     //     rb->GetVelocityFromWheels(vel);

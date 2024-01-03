@@ -28,7 +28,7 @@ int main()
 
     imu::Vector<3> acc_NEDframe;
     double *gyr_NEDframe;
-    BNO055 bno = BNO055(-1, BNO055_ADDRESS_A, 1);
+    BNO055 bno = BNO055(-1, BNO055_ADDRESS_B, 7);
     bno.begin(bno.OPERATION_MODE_NDOF_FMC_OFF);
     usleep(500000);
 
