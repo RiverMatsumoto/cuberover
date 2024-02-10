@@ -38,8 +38,10 @@ WheelHardwareInterface::WheelHardwareInterface(ros::NodeHandle* nh, WheelHwinSet
     // store and calibrate imu
     // 0x28 is the default address for the imu
     // imu = BNO055(-1, 0x28, 1); 
-    imu0.begin(imu0.OPERATION_MODE_NDOF);
-    imu1.begin(imu1.OPERATION_MODE_NDOF);
+    if (wheelSettings->use_imu0)
+        imu0.begin(imu0.OPERATION_MODE_NDOF);
+    if (wheelSettings->use_imu1)
+        imu1.begin(imu1.OPERATION_MODE_NDOF);
 
     this->wheelSettings = wheelSettings;
     ROS_INFO("Registering ros_control joint interfaces");
@@ -73,7 +75,6 @@ void WheelHardwareInterface::writeToWheels(Roboclaw *rb)
 
 void WheelHardwareInterface::readFromWheels(Roboclaw *rb)
 {
-
     cr_control::wheel_data msg;
     RoboclawMotorCurrents motorCurrentsFront = rb->ReadMotorCurrents(128);
     RoboclawMotorCurrents motorCurrentsBack = rb->ReadMotorCurrents(129);
@@ -92,70 +93,76 @@ void WheelHardwareInterface::readFromWheels(Roboclaw *rb)
 
     // Read from imu and do error checking
     uint8_t system_status0, self_test_results0, system_error0;
-    imu0.getSystemStatus(&system_status0, &self_test_results0, &system_error0);
-    if (system_status0 == 1) 
+    if (wheelSettings->use_imu0)
     {
-        std::cout << "imu0 error detected... restarting imu..." << std::endl;
-        imu0.begin(imu0.OPERATION_MODE_NDOF);
-        std::cout << "imu0 restarted" << std::endl;
+        imu0.getSystemStatus(&system_status0, &self_test_results0, &system_error0);
+        if (system_status0 == 1) 
+        {
+            std::cout << "imu0 error detected... restarting imu..." << std::endl;
+            imu0.begin(imu0.OPERATION_MODE_NDOF);
+            std::cout << "imu0 restarted" << std::endl;
+        }
     }
-    uint8_t system_status1, self_test_results1, system_error1;
-    imu1.getSystemStatus(&system_status1, &self_test_results1, &system_error1);
-    if (system_status1 == 1) 
+    if (wheelSettings->use_imu1)
     {
-        std::cout << "imu1 error detected... restarting imu..." << std::endl;
-        imu1.begin(imu1.OPERATION_MODE_NDOF);
-        std::cout << "imu1 restarted" << std::endl;
+        uint8_t system_status1, self_test_results1, system_error1;
+        imu1.getSystemStatus(&system_status1, &self_test_results1, &system_error1);
+        if (system_status1 == 1) 
+        {
+            std::cout << "imu1 error detected... restarting imu..." << std::endl;
+            imu1.begin(imu1.OPERATION_MODE_NDOF);
+            std::cout << "imu1 restarted" << std::endl;
+        }
     }
 
     // collect data from imus and store in ros message
-    imu::Quaternion quat0 = imu0.getQuat();
-    imu::Vector<3> lin_accel_body_frame0 = imu0.getVector(BNO055::VECTOR_LINEARACCEL);
-    imu::Vector<3> orientation_body_frame0 = imu0.getVector(BNO055::VECTOR_EULER);
-    imu::Vector<3> lin_accel_ned_frame0 = accel_body_frame_to_ned_frame(
-        quat0.w(), 
-        quat0.x(), 
-        quat0.y(), 
-        quat0.z(), 
-        lin_accel_body_frame0.x(), 
-        lin_accel_body_frame0.y(), 
-        lin_accel_body_frame0.z());
-    
-    msg.xAccelImu0 = lin_accel_ned_frame0.x();
-    msg.yAccelImu0 = lin_accel_ned_frame0.y();
-    msg.zAccelImu0 = lin_accel_ned_frame0.z();
+    if (wheelSettings->use_imu0)
+    {
+        imu::Quaternion quat0 = imu0.getQuat();
+        imu::Vector<3> lin_accel_body_frame0 = imu0.getVector(BNO055::VECTOR_LINEARACCEL);
+        imu::Vector<3> orientation_body_frame0 = imu0.getVector(BNO055::VECTOR_EULER);
+        imu::Vector<3> lin_accel_ned_frame0 = accel_body_frame_to_ned_frame(
+            quat0.w(), 
+            quat0.x(), 
+            quat0.y(), 
+            quat0.z(), 
+            lin_accel_body_frame0.x(), 
+            lin_accel_body_frame0.y(), 
+            lin_accel_body_frame0.z());
+        
+        msg.xAccelImu0 = lin_accel_ned_frame0.x();
+        msg.yAccelImu0 = lin_accel_ned_frame0.y();
+        msg.zAccelImu0 = lin_accel_ned_frame0.z();
 
-    msg.wOrientationImu0 = quat0.w();
-    msg.xOrientationImu0 = quat0.x();
-    msg.yOrientationImu0 = quat0.y();
-    msg.zOrientationImu0 = quat0.z();
+        msg.wOrientationImu0 = quat0.w();
+        msg.xOrientationImu0 = quat0.x();
+        msg.yOrientationImu0 = quat0.y();
+        msg.zOrientationImu0 = quat0.z();
+    }
 
-    imu::Quaternion quat1 = imu1.getQuat();
-    imu::Vector<3> lin_accel_body_frame1 = imu1.getVector(BNO055::VECTOR_LINEARACCEL);
-    imu::Vector<3> orientation_body_frame1 = imu1.getVector(BNO055::VECTOR_EULER);
-    imu::Vector<3> lin_accel_ned_frame1 = accel_body_frame_to_ned_frame(
-        quat1.w(), 
-        quat1.x(), 
-        quat1.y(), 
-        quat1.z(), 
-        lin_accel_body_frame1.x(), 
-        lin_accel_body_frame1.y(), 
-        lin_accel_body_frame1.z());
-    
-    msg.xAccelImu1 = lin_accel_ned_frame1.x();
-    msg.yAccelImu1 = lin_accel_ned_frame1.y();
-    msg.zAccelImu1 = lin_accel_ned_frame1.z();
+    if (wheelSettings->use_imu1)
+    {
+        imu::Quaternion quat1 = imu1.getQuat();
+        imu::Vector<3> lin_accel_body_frame1 = imu1.getVector(BNO055::VECTOR_LINEARACCEL);
+        imu::Vector<3> orientation_body_frame1 = imu1.getVector(BNO055::VECTOR_EULER);
+        imu::Vector<3> lin_accel_ned_frame1 = accel_body_frame_to_ned_frame(
+            quat1.w(), 
+            quat1.x(), 
+            quat1.y(), 
+            quat1.z(), 
+            lin_accel_body_frame1.x(), 
+            lin_accel_body_frame1.y(), 
+            lin_accel_body_frame1.z());
+        
+        msg.xAccelImu1 = lin_accel_ned_frame1.x();
+        msg.yAccelImu1 = lin_accel_ned_frame1.y();
+        msg.zAccelImu1 = lin_accel_ned_frame1.z();
 
-    msg.wOrientationImu1 = quat1.w();
-    msg.xOrientationImu1 = quat1.x();
-    msg.yOrientationImu1 = quat1.y();
-    msg.zOrientationImu1 = quat1.z();
-
-    // if (wheelSettings->debugMode) {
-    //     rb->GetVelocityFromWheels(vel);
-
-    //     ROS_INFO_STREAM("READING JOINT STATES FROM MOTOR ENCODERS");
-    // }
+        msg.wOrientationImu1 = quat1.w();
+        msg.xOrientationImu1 = quat1.x();
+        msg.yOrientationImu1 = quat1.y();
+        msg.zOrientationImu1 = quat1.z();
+    }
 
     roverDataPub.publish(msg);
 }
@@ -213,10 +220,28 @@ void WheelHardwareInterface::driveWithSpeed(Roboclaw *rb)
     // speed / 2 pi 7.5cm * ticks/rev = ticks/s
 
     float encoderTicksPerRev = wheelSettings->encoderTicksPerRevolution;
-    rb->DriveSpeedAccelM2(128, encoderTicksPerRev / 2, cmd_to_send[0]);
-    rb->DriveSpeedAccelM2(129, encoderTicksPerRev / 2, cmd_to_send[1]);
-    rb->DriveSpeedAccelM1(128, encoderTicksPerRev / 2, cmd_to_send[2]);
-    rb->DriveSpeedAccelM1(129, encoderTicksPerRev / 2, cmd_to_send[3]);
+    // ROS_INFO_STREAM("cmd 0: " << cmd_to_send[0]);
+    // ROS_INFO_STREAM("cmd 1: " << cmd_to_send[1]);
+    // ROS_INFO_STREAM("cmd 2: " << cmd_to_send[2]);
+    // ROS_INFO_STREAM("cmd 3: " << cmd_to_send[3]);
+    
+    if (cmd_to_send[0] == 0 &&
+        cmd_to_send[0] == 0 &&
+        cmd_to_send[0] == 0 &&
+        cmd_to_send[0] == 0)
+    {
+        rb->DriveSpeedAccelM2(128, (int)(encoderTicksPerRev / 2), 0);
+        rb->DriveSpeedAccelM2(129, (int)(encoderTicksPerRev / 2), 0);
+        rb->DriveSpeedAccelM1(128, (int)(encoderTicksPerRev / 2), 0);
+        rb->DriveSpeedAccelM1(129, (int)(encoderTicksPerRev / 2), 0);
+    }
+    else
+    {
+        rb->DriveSpeedAccelM2(128, (int)(encoderTicksPerRev / 1.5), cmd_to_send[0]);
+        rb->DriveSpeedAccelM2(129, (int)(encoderTicksPerRev / 1.5), cmd_to_send[1]);
+        rb->DriveSpeedAccelM1(128, (int)(encoderTicksPerRev / 1.5), cmd_to_send[2]);
+        rb->DriveSpeedAccelM1(129, (int)(encoderTicksPerRev / 1.5), cmd_to_send[3]);
+    }
 
     cmd[0] = cmd[1] = cmd[2] = cmd[3] = 0;
 }

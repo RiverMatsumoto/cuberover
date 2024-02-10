@@ -22,6 +22,8 @@ struct WheelHwinSettings
     int rosLoopRate = 10;
     int maxRetries = 3;
     bool debugMode = false;
+    bool use_imu0 = false;
+    bool use_imu1 = false;
     float encoderTicksPerRevolution;
     float revolutionsPerEncoderTick;
 };

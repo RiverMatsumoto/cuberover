@@ -1,13 +1,13 @@
 cr_joint_publisher:
         type: "joint_state_controller/JointStateController"
-        publish_rate: 50
+        publish_rate: 30
 
 #parameters for the different drive controller aka wheel velocity controller.
 cr_velocity_controller:
         type: "diff_drive_controller/DiffDriveController"
         left_wheel: ['joint_left_front_wheel', 'joint_left_back_wheel']
         right_wheel: ['joint_right_front_wheel', 'joint_right_back_wheel']
-        publish_rate: 50.0
+        publish_rate: 30.0
         pose_covariance_diagonal: [0.001, 0.001, 0.001, 0.001, 0.001, 0.03]
         twist_covariance_diagonal: [0.001, 0.001, 0.001, 0.001, 0.001, 0.03]
         cmd_vel_timeout: 0.50

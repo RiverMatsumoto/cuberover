@@ -38,7 +38,12 @@ int main(int argc, char **argv)
         wheelHwin.writeToWheels(&roboclaw);
         rate.sleep();
     }
-
+    
+    roboclaw.ForwardM1(128, 0);
+    roboclaw.ForwardM2(128, 0);
+    roboclaw.ForwardM1(129, 0);
+    roboclaw.ForwardM2(129, 0);
+    
     return 0;
 }
 
@@ -64,6 +69,8 @@ void GetYamlParameters(ros::NodeHandle* nh, WheelHwinSettings *wheelSettings, Ro
     nh->getParam("/wheel_hwin_settings/right_addr", rightWheelAddresses);
     nh->getParam("/wheel_hwin_settings/left_wheel", leftWheelNames);
     nh->getParam("/wheel_hwin_settings/right_wheel", rightWheelNames);
+    nh->getParam("/wheel_hwin_settings/use_imu0", wheelSettings->use_imu0);
+    nh->getParam("/wheel_hwin_settings/use_imu1", wheelSettings->use_imu1);
 
     for (int i = 0; i < 2; i++) {
         // copy ros_params settings into wheel settings struct

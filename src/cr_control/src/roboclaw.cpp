@@ -48,8 +48,6 @@ Roboclaw::Roboclaw(RoboclawSettings* settings) {
 
 Roboclaw::~Roboclaw() {
     ROS_INFO("Deconstructing: closing serial port connection");
-    ForwardM2(0x80, 0);
-    ForwardM1(0x80, 0);
     CloseEncoders();
 }
 
@@ -494,7 +492,6 @@ float Roboclaw::ReadMainBatteryVoltage(uint8_t address)
     uint8_t data[2] = {address, settings->readMainBatteryVoltage};
 
     SendCommands(data, 2, 4);
-
 
     uint16_t voltage_temp; // read as tenths of a volt
     Copy_uint16_from_bytes(voltage_temp, &buf[0]);

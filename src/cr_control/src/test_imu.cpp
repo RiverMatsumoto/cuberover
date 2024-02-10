@@ -4,6 +4,9 @@
 #include <iomanip>
 #include <unistd.h>
 
+// atan2
+#include <math.h>
+
 // imu header
 #include <cr_control/bno055/BNO055.h>
 
@@ -25,11 +28,10 @@ imu::Vector<3> Acc_bframe_to_acc_NEDframe(double qW, double qX, double qY, doubl
 
 int main()
 {
-
     imu::Vector<3> acc_NEDframe;
     double *gyr_NEDframe;
-    BNO055 bno = BNO055(-1, BNO055_ADDRESS_B, 7);
-    bno.begin(bno.OPERATION_MODE_NDOF_FMC_OFF);
+    BNO055 bno = BNO055(-1, BNO055_ADDRESS_A, 7);
+    bno.begin(bno.OPERATION_MODE_NDOF);
     usleep(500000);
 
     int temp = bno.getTemp();
@@ -46,6 +48,13 @@ int main()
     acc_NEDframe = Acc_bframe_to_acc_NEDframe(quat.w(), quat.x(), quat.y(), quat.z(), acc_bframe.x(), acc_bframe.y(), acc_bframe.z());
     std::cout << "X: " << acc_NEDframe[0] << " Y: " << acc_NEDframe[1] << " Z: " << acc_NEDframe[2] << std::endl;
 
+    // while (mag_calibration < 3)
+    // {
+    //     bno.getCalibration(NULL, NULL, NULL, &mag_calibration);
+    //     std::cout << "Still calibrating magnetometer, magnetometer calibration value: " << (int)mag_calibration << std::endl;
+    //     usleep(500000);
+    // }
+
     while (1)
     {
 
@@ -60,11 +69,24 @@ int main()
 
         gyr_bframe = bno.getVector(BNO055::VECTOR_EULER);
 
-        std::cout << "X: " << std::setw(10) << std::fixed << std::setprecision(3) << gyr_bframe[0] 
-            << " Y: "  << std::setw(10) << std::fixed << std::setprecision(3) << gyr_bframe[1] 
-            << " Z: "  << std::setw(10) << std::fixed << std::setprecision(3) << gyr_bframe[2]  
-            << std::endl;
+        std::cout << "Absolute orientation:" << std::endl;
+        std::cout << "X: " << std::setw(10) << std::fixed << std::setprecision(3) << gyr_bframe[0]
+                  << " Y: " << std::setw(10) << std::fixed << std::setprecision(3) << gyr_bframe[1]
+                  << " Z: " << std::setw(10) << std::fixed << std::setprecision(3) << gyr_bframe[2]
+                  << std::endl;
 
+        // Test magnetometer
+        imu::Vector<3> mag_vector = bno.getVector(BNO055::VECTOR_MAGNETOMETER);
+        uint8_t mag_calibration = 0;
+        bno.getCalibration(NULL, NULL, NULL, &mag_calibration);
+
+        std::cout << "Magnetometer, calibration=" << (int)mag_calibration << std::endl;
+        std::cout << "Raw magnetometer values:" << std::endl;
+        std::cout << "X: " << std::setw(10) << std::fixed << std::setprecision(3) << mag_vector[0]
+                  << " Y: " << std::setw(10) << std::fixed << std::setprecision(3) << mag_vector[1]
+                  << " Z: " << std::setw(10) << std::fixed << std::setprecision(3) << mag_vector[2]
+                  << std::endl;
+        std::cout << "atan2(y,x) = heading = " << atan2(mag_vector[1], mag_vector[0]) * (180 / M_PI) << std::endl;
 
         uint8_t system_status, self_test_results, system_error;
         bno.getSystemStatus(&system_status, &self_test_results, &system_error);
