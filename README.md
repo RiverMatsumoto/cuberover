@@ -11,14 +11,18 @@ Hardware used:
 
 ## Software Dependencies
 
-WIP
-
 ZED SDK
-ROS + Some packages
+ROS
 
-## Starting up cuberover and building/compiling the workspace
+## Building/compiling the workspace
 
-WIP
+```
+git clone --recursive git@github.com:RiverMatsumoto/cuberover.git
+cd ./cuberover
+rosdep install --from-paths src --ignore-src -r -y
+catkin_make -DCMAKE_BUILD_TYPE=Release
+source ./devel/setup.bash
+```
 
 ## Launching specific components of cuberover
 
