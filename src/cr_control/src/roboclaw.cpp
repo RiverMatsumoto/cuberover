@@ -21,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE. */
 
 // Linux headers
-#include <fcntl.h> // File controls like O_RDWR
+#include <fcntl.h> // File controls e.g. O_RDWR
 #include <errno.h> // Error integer and strerror()
 #include <termios.h> // POSIX terminal control definitions
 #include <unistd.h>  // read(), write(), close()
@@ -187,7 +187,7 @@ int Roboclaw::SendCommands(uint8_t* data, int writeBytes, int readBytes) {
         if (r >= settings->retries) return -1;
 
         // read data from uart
-        readFlag = ReadFromEncoders(readBytes);
+        readFlag = ReadFromRoboclaw(readBytes);
         if (readFlag == readBytes) return 1;
         if (readFlag == -1) 
         {
@@ -264,7 +264,7 @@ int Roboclaw::WaitReadStatus(int nBytes, int timeout_ms) {
 /* Reads available data from roboclaw buffer. returns the number of bytes specified by the user upon success (readFlag > 0).
    Returns -1 upon failure. */
 
-int Roboclaw::ReadFromEncoders(int nBytes) {
+int Roboclaw::ReadFromRoboclaw(int nBytes) {
     for (int i = 0; i < settings->maxBufferSize; i++)
         buf[i] = 0;
 
@@ -302,7 +302,7 @@ uint16_t Roboclaw::CalculateChecksum(uint8_t* packet, int nBytes) {
    and checksum in an array, send commands to be executed. */
 
 void Roboclaw::ForwardM1(uint8_t address, uint8_t value) {
-    uint8_t get_crc[3] = {address, settings->m1Forward, value};
+    uint8_t get_crc[3] = {address, ROBOCLAW_M1_FORWARD, value};
     uint8_t data[5];
 
     uint16_t crc = CalculateChecksum(get_crc, 3);
@@ -319,7 +319,7 @@ void Roboclaw::ForwardM1(uint8_t address, uint8_t value) {
 /* Move M1 motors backwards */
 
 void Roboclaw::BackwardM1(uint8_t address, uint8_t value) {
-    uint8_t get_crc[3] = {address, settings->m1Backward, value};
+    uint8_t get_crc[3] = {address, ROBOCLAW_M1_BACKWARD, value};
     uint8_t data[5];
 
     uint16_t crc = CalculateChecksum(get_crc, 3);
@@ -337,7 +337,7 @@ void Roboclaw::BackwardM1(uint8_t address, uint8_t value) {
    and checksum in an array, send commands to be executed. */
 
 void Roboclaw::ForwardM2(uint8_t address, uint8_t value) {
-    uint8_t get_crc[3] = {address, settings->m2Forward, value};
+    uint8_t get_crc[3] = {address, ROBOCLAW_M2_FORWARD, value};
     uint8_t data[5];
 
     uint16_t crc = CalculateChecksum(get_crc, 3);
@@ -354,7 +354,7 @@ void Roboclaw::ForwardM2(uint8_t address, uint8_t value) {
 /* Move M2 motors backwards */
 
 void Roboclaw::BackwardM2(uint8_t address, uint8_t value) {
-    uint8_t get_crc[3] = {address, settings->m2Backward, value};
+    uint8_t get_crc[3] = {address, ROBOCLAW_M2_BACKWARD, value};
     uint8_t data[5];
 
     uint16_t crc = CalculateChecksum(get_crc, 3);
@@ -372,7 +372,7 @@ void Roboclaw::DriveSpeedM1(uint8_t address, int32_t speed)
 {
     uint8_t data[8];
     data[0] = address;
-    data[1] = settings->m1DriveSpeed;
+    data[1] = ROBOCLAW_M1_DRIVE_AT_SPEED;
     Copy_bytes_from_int32(&data[2], speed);
 
     uint8_t get_crc[6];
@@ -389,7 +389,7 @@ void Roboclaw::DriveSpeedM2(uint8_t address, int32_t speed)
 {
     uint8_t data[8];
     data[0] = address;
-    data[1] = settings->m2DriveSpeed;
+    data[1] = ROBOCLAW_M2_DRIVE_AT_SPEED;
     Copy_bytes_from_int32(&data[2], speed);
 
     uint8_t get_crc[6];
@@ -406,7 +406,7 @@ void Roboclaw::DriveSpeedAccelM1(uint8_t address, int32_t acceleration, int32_t 
 {
     uint8_t data[12];
     data[0] = address;
-    data[1] = settings->m1DriveSpeedAccel;
+    data[1] = ROBOCLAW_M1_DRIVE_AT_SPEED_ACCEL;
     Copy_bytes_from_int32(&data[2], acceleration);
     Copy_bytes_from_int32(&data[6], speed);
 
@@ -424,7 +424,7 @@ void Roboclaw::DriveSpeedAccelM2(uint8_t address, int32_t acceleration, int32_t 
 {
     uint8_t data[12];
     data[0] = address;
-    data[1] = settings->m2DriveSpeedAccel;
+    data[1] = ROBOCLAW_M2_DRIVE_AT_SPEED_ACCEL;
     Copy_bytes_from_int32(&data[2], acceleration);
     Copy_bytes_from_int32(&data[6], speed);
 
@@ -441,7 +441,7 @@ void Roboclaw::DriveSpeedAccelM2(uint8_t address, int32_t acceleration, int32_t 
 
 RoboclawPidQppsSettings Roboclaw::ReadPidQppsSettingsM1(uint8_t address)
 {
-    uint8_t data[2] = {address, settings->m1ReadPidQppsSettings};
+    uint8_t data[2] = {address, ROBOCLAW_M1_READ_PID_QPPS_SETTINGS};
 
     SendCommands(data, 2, 18);
 
@@ -465,7 +465,7 @@ RoboclawPidQppsSettings Roboclaw::ReadPidQppsSettingsM1(uint8_t address)
 
 RoboclawPidQppsSettings Roboclaw::ReadPidQppsSettingsM2(uint8_t address)
 {
-    uint8_t data[2] = {address, settings->m2ReadPidQppsSettings};
+    uint8_t data[2] = {address, ROBOCLAW_M2_READ_PID_QPPS_SETTINGS};
 
     SendCommands(data, 2, 18);
 
@@ -489,7 +489,7 @@ RoboclawPidQppsSettings Roboclaw::ReadPidQppsSettingsM2(uint8_t address)
 
 float Roboclaw::ReadMainBatteryVoltage(uint8_t address)
 {
-    uint8_t data[2] = {address, settings->readMainBatteryVoltage};
+    uint8_t data[2] = {address, ROBOCLAW_READ_MAIN_BATTERY_VOLTAGE};
 
     SendCommands(data, 2, 4);
 
@@ -501,7 +501,7 @@ float Roboclaw::ReadMainBatteryVoltage(uint8_t address)
 
 RoboclawMotorCurrents Roboclaw::ReadMotorCurrents(uint8_t address)
 {
-    uint8_t data[2] = {address, settings->readMotorCurrents};
+    uint8_t data[2] = {address, ROBOCLAW_READ_MOTOR_CURRENTS};
 
     SendCommands(data, 2, 6);
 
@@ -520,7 +520,7 @@ RoboclawMotorCurrents Roboclaw::ReadMotorCurrents(uint8_t address)
 int32_t Roboclaw::ReadEncoderPositionM1(uint8_t address)
 {
     //uint8_t get_crc[2] = {address, settings->m1ReadEncoderPosition};
-    uint8_t data[2] = {address, settings->m1ReadEncoderPosition};
+    uint8_t data[2] = {address, ROBOCLAW_M1_READ_ENCODER_POSITION};
     
     SendCommands(data, 2, 7);
     int32_t encoderVal = 0;
@@ -538,7 +538,7 @@ int32_t Roboclaw::ReadEncoderPositionM2(uint8_t address)
     
     const int statusByte = 4;
 
-    uint8_t data[2] = {address, settings->m2ReadEncoderPosition};
+    uint8_t data[2] = {address, ROBOCLAW_M2_READ_ENCODER_POSITION};
     
     SendCommands(data, 2, 7);
     int32_t encoderVal = 0;
@@ -551,7 +551,7 @@ int32_t Roboclaw::ReadEncoderPositionM2(uint8_t address)
 }
 
 int32_t Roboclaw::ReadEncoderSpeedM1(uint8_t address) {
-    uint8_t get_crc[2] = {address, settings->m1ReadEncoderSpeed};
+    uint8_t get_crc[2] = {address, ROBOCLAW_M1_READ_ENCODER_SPEED};
     uint8_t data[7];
 
     for (int i = 0; i < 2; i++)
@@ -567,7 +567,7 @@ int32_t Roboclaw::ReadEncoderSpeedM1(uint8_t address) {
 }
 
 int32_t Roboclaw::ReadEncoderSpeedM2(uint8_t address) {
-    uint8_t get_crc[2] = {address, settings->m2ReadEncoderSpeed};
+    uint8_t get_crc[2] = {address, ROBOCLAW_M2_READ_ENCODER_SPEED};
     uint8_t data[7];
 
     for (int i = 0; i < 2; i++)
@@ -582,18 +582,18 @@ int32_t Roboclaw::ReadEncoderSpeedM2(uint8_t address) {
     return speed;
 }
 
-void Roboclaw::SetPositionM1(uint8_t address, uint32_t value)
+void Roboclaw::MoveToPositionM1(uint8_t address, uint32_t value)
 {
     uint8_t tempVal[4];
     tempVal[0] = (uint8_t)((value >> 24) & 0xFF);
     tempVal[1] = (uint8_t)((value >> 16) & 0xFF);
     tempVal[2] = (uint8_t)((value >> 8) & 0xFF);
     tempVal[3] = (uint8_t)(value & 0xFF);
-    uint8_t get_crc[7] = {address, settings->m1Position, tempVal[0], tempVal[1], tempVal[2], tempVal[3], 0};
+    uint8_t get_crc[7] = {address, ROBOCLAW_M1_MOVE_TO_POSITION, tempVal[0], tempVal[1], tempVal[2], tempVal[3], 0};
     uint8_t data[9];
 
     data[0] = address;
-    data[1] = settings->m2Position;
+    data[1] = ROBOCLAW_M1_MOVE_TO_POSITION;
     data[2] = (uint8_t)((value >> 24) & 0xFF);
     data[3] = (uint8_t)((value >> 16) & 0xFF);
     data[4] = (uint8_t)((value >> 8) & 0xFF);
@@ -608,7 +608,7 @@ void Roboclaw::SetPositionM1(uint8_t address, uint32_t value)
     SendCommands(data, 9, 1);
 }
 
-void Roboclaw::SetPositionM2(uint8_t address, int32_t value)
+void Roboclaw::MoveToPositionM2(uint8_t address, int32_t value)
 {
     uint8_t tempVal[4];
 
@@ -617,11 +617,11 @@ void Roboclaw::SetPositionM2(uint8_t address, int32_t value)
     tempVal[2] = ((value >> 8) & 0xFF);
     tempVal[3] = (value & 0xFF);
 
-    uint8_t get_crc[7] = {address, settings->m2Position, tempVal[0], tempVal[1], tempVal[2], tempVal[3], 0};
+    uint8_t get_crc[7] = {address, ROBOCLAW_M2_MOVE_TO_POSITION, tempVal[0], tempVal[1], tempVal[2], tempVal[3], 0};
     uint8_t data[9];
 
     data[0] = address;
-    data[1] = settings->m2Position;
+    data[1] = ROBOCLAW_M2_MOVE_TO_POSITION;
     data[2] = ((value >> 24) & 0xFF);
     data[3] = ((value >> 16) & 0xFF);
     data[4] = ((value >> 8) & 0xFF);
@@ -693,32 +693,32 @@ void Roboclaw::GetVelocityFromWheels(double* vel) {
     // return positive or negative value from encoders, depending on direction
     ReadEncoderSpeedM1(0x80);  // right_front
     vel[0] = ConvertPulsesToRadians(
-        static_cast<double> (RecombineBuffer(buf)));
+        static_cast<double>(RecombineBuffer(buf)));
     if (buf[4] == 1) vel[0] = -vel[0];
 
     ReadEncoderSpeedM2(0x80);  // right_middle
     vel[1] = ConvertPulsesToRadians(
-        static_cast<double> (RecombineBuffer(buf)));
+        static_cast<double>(RecombineBuffer(buf)));
     if (buf[4] == 1) vel[0] = -vel[0];
 
     ReadEncoderSpeedM1(0x81);  // right_back
     vel[2] = ConvertPulsesToRadians(
-        static_cast<double> (RecombineBuffer(buf)));
+        static_cast<double>(RecombineBuffer(buf)));
     if (buf[4] == 1) vel[0] = -vel[0];
 
     ReadEncoderSpeedM2(0x82);  // left_front
     vel[3] = ConvertPulsesToRadians(
-        static_cast<double> (RecombineBuffer(buf)));
+        static_cast<double>(RecombineBuffer(buf)));
     if (buf[4] == 1) vel[0] = -vel[0];
 
     ReadEncoderSpeedM1(0x82);  // left_middle
     vel[4] = ConvertPulsesToRadians(
-        static_cast<double> (RecombineBuffer(buf)));
+        static_cast<double>(RecombineBuffer(buf)));
     if (buf[4] == 1) vel[0] = -vel[0];
 
     ReadEncoderSpeedM2(0x81);  // left_back
     vel[5] = ConvertPulsesToRadians(
-        static_cast<double> (RecombineBuffer(buf)));
+        static_cast<double>(RecombineBuffer(buf)));
     if (buf[4] == 1) vel[0] = -vel[0];
 }
 
@@ -744,37 +744,25 @@ double Roboclaw::ConvertPulsesToRadians(double vel) {
 // leftmost byte is most significant byte
 void Roboclaw::Copy_uint16_from_bytes(uint16_t& to, uint8_t* from)
 {
-    to = 0;
-    to |= from[0] << 8;
-    to |= from[1];
+    to = (from[0] << 8 | from[1]);
 }
 
 // leftmost byte is most significant byte
 void Roboclaw::Copy_uint32_from_bytes(uint32_t& to, uint8_t* from)
 {
-    to = 0;
-    to |= from[0] << 24;
-    to |= from[1] << 16;
-    to |= from[2] << 8;
-    to |= from[3];
+    to = (from[0] << 24 | from[1] << 16 | from[2] << 8 | from[3]);
 }
 
 // leftmost byte is most significant byte
 void Roboclaw::Copy_int16_from_bytes(int16_t& to, uint8_t* from)
 {
-    to = 0;
-    to |= from[0] << 8;
-    to |= from[1];
+    to = (from[0] << 8 | from[1]);
 }
 
 // leftmost byte is most significant byte
 void Roboclaw::Copy_int32_from_bytes(int32_t& to, uint8_t* from)
 {
-    to = 0;
-    to |= from[0] << 24;
-    to |= from[1] << 16;
-    to |= from[2] << 8;
-    to |= from[3];
+    to = (from[0] << 24 | from[1] << 16 | from[2] << 8 | from[3]);
 }
 
 void Roboclaw::Copy_bytes_from_int32(uint8_t* to, int32_t from)

@@ -23,6 +23,25 @@ SOFTWARE. */
 #include <stdint.h>
 #include <termios.h>
 
+#define ROBOCLAW_M1_FORWARD                     0
+#define ROBOCLAW_M1_BACKWARD                    1
+#define ROBOCLAW_M2_FORWARD                     4
+#define ROBOCLAW_M2_BACKWARD                    5
+#define ROBOCLAW_M1_READ_ENCODER_POSITION       16
+#define ROBOCLAW_M2_READ_ENCODER_POSITION       17
+#define ROBOCLAW_M1_READ_ENCODER_SPEED          18
+#define ROBOCLAW_M2_READ_ENCODER_SPEED          19
+#define ROBOCLAW_READ_MAIN_BATTERY_VOLTAGE      24
+#define ROBOCLAW_M1_DRIVE_AT_SPEED              35
+#define ROBOCLAW_M2_DRIVE_AT_SPEED              36
+#define ROBOCLAW_M1_DRIVE_AT_SPEED_ACCEL        38
+#define ROBOCLAW_M2_DRIVE_AT_SPEED_ACCEL        39
+#define ROBOCLAW_READ_MOTOR_CURRENTS            49
+#define ROBOCLAW_M1_READ_PID_QPPS_SETTINGS      55
+#define ROBOCLAW_M2_READ_PID_QPPS_SETTINGS      56
+#define ROBOCLAW_M1_MOVE_TO_POSITION            119
+#define ROBOCLAW_M2_MOVE_TO_POSITION            120
+
 struct RoboclawSettings 
 {
     std::string serialPortAddress;
@@ -31,24 +50,6 @@ struct RoboclawSettings
     int retries                     = 3;
     int baudRate                    = 115200;
     const int maxBufferSize               = 100;
-    const uint8_t m1Forward               = 0;
-    const uint8_t m2Forward               = 4;
-    const uint8_t m1Backward              = 1;
-    const uint8_t m2Backward              = 5;
-    const uint8_t m1ReadEncoderPosition   = 16;
-    const uint8_t m2ReadEncoderPosition   = 17;
-    const uint8_t m1ReadEncoderSpeed      = 18;
-    const uint8_t m2ReadEncoderSpeed      = 19;
-    const uint8_t readMainBatteryVoltage  = 24;
-    const uint8_t m1DriveSpeed = 35;
-    const uint8_t m2DriveSpeed = 36;
-    const uint8_t m1DriveSpeedAccel = 38;
-    const uint8_t m2DriveSpeedAccel = 39;
-    const uint8_t readMotorCurrents = 49;
-    const uint8_t m1ReadPidQppsSettings   = 55; // PID and Quadrature Pulses Per Second
-    const uint8_t m2ReadPidQppsSettings   = 56;
-    const uint8_t m1Position = 119;
-    const uint8_t m2Position = 120;
     const uint8_t maxEffortValue = 126;
     double loopFrequency            = 10;
     bool debugMode                  = false;
@@ -94,15 +95,15 @@ class Roboclaw
     int32_t ReadEncoderPositionM2(uint8_t address);
     int32_t ReadEncoderSpeedM1(uint8_t address);
     int32_t ReadEncoderSpeedM2(uint8_t address);
-    void SetPositionM1(uint8_t address, uint32_t value);
-    void SetPositionM2(uint8_t address, int32_t value);
+    void MoveToPositionM1(uint8_t address, uint32_t value);
+    void MoveToPositionM2(uint8_t address, int32_t value);
 
  private:
     void GetBaudRate();
     int ClearIOBuffers();
     int WriteToEncoders(uint8_t* data, int nBytes);
     int WaitReadStatus(int nBytes, int timeout_ms);
-    int ReadFromEncoders(int nBytes);
+    int ReadFromRoboclaw(int nBytes);
     int SendCommands(uint8_t* data, int writeBytes, int readBytes);
     double ConvertPulsesToRadians(double vel);
     uint8_t ScaleCommand(double cmd);
