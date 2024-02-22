@@ -11,3 +11,6 @@
 [submodule "rosbag_to_csv"]
 	path = src/rosbag_to_csv
 	url = https://github.com/AtsushiSakai/rosbag_to_csv
+[submodule "src/vicon_bridge"]
+	path = src/vicon_bridge
+	url = https://github.com/ethz-asl/vicon_bridge.git
