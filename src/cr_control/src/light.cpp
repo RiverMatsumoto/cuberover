@@ -43,5 +43,7 @@ int main(int argc, char **argv)
     ROS_INFO("Started light node");
     ros::spin();
 
+    GPIO::cleanup();
+
     return 0;
 }
