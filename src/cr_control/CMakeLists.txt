@@ -17,10 +17,17 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
 )
 
+find_package(JetsonGPIO)
+
 add_message_files(
   FILES
   wheel_data.msg
   trial_sample.msg
+)
+
+add_service_files(
+  FILES
+  LightState.srv
 )
 
 # Generate added messages and services with any dependencies listed here
@@ -83,3 +90,14 @@ set_target_properties(wheel_hardware_interface PROPERTIES
 )
 link_directories(${catkin_LIBRARY_DIRS})
 add_dependencies(wheel_hardware_interface ${${PROJECT_NAME}_EXPORTED_TARGETS})
+
+
+add_executable(light_node
+  src/light.cpp
+)
+target_link_libraries(light_node 
+  ${catkin_LIBRARIES}
+  JetsonGPIO::JetsonGPIO
+)
+link_directories(${catkin_LIBRARY_DIRS})
+add_dependencies(light_node ${${PROJECT_NAME}_EXPORTED_TARGETS})
