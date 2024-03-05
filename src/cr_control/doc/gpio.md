@@ -1,4 +1,4 @@
-
+Jetson Orin Nano Pinout
 3.3VDC              ( 1)        ( 2) 5.0VDC
 I2C1_SDA I2c Bus 7  ( 3)        ( 4) 5.0VDC
 I2c1_SCL I2c Bus 7  ( 5)        ( 6) GND
