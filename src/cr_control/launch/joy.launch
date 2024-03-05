@@ -1,12 +1,8 @@
 <?xml version="1.0"?>
 <launch>
-
     <include file="$(find teleop_twist_joy)/launch/teleop.launch">
         <arg name="joy_config" value="xbox"/>
         <remap from="/cmd_vel" to="/cr_velocity_controller/cmd_vel"/>
     </include>
     <node name="controls_node" pkg="cr_control" type="joy_controls.py" output="screen"/>
-    
-    
-
 </launch>

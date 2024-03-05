@@ -1,6 +1,6 @@
 <launch>
 	<rosparam command="load" file="$(find cr_control)/config/control.yaml"/>
-	<rosparam command="load" file="$(find cr_control)/config/wheel_hwin_settings.yaml"/>
+	<rosparam command="load" file="$(find cr_control)/config/hwin_settings.yaml"/>
 	<!-- Launch hardware interface then add the controller manager and controllers-->
 	<include file="$(find vicon_bridge)/launch/vicon.launch" >
 		<arg name="datastream_hostport" value="192.168.0.151" />
