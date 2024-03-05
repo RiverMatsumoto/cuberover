@@ -28,6 +28,7 @@ add_message_files(
 add_service_files(
   FILES
   LightState.srv
+  ServoState.srv
 )
 
 # Generate added messages and services with any dependencies listed here
@@ -91,7 +92,6 @@ set_target_properties(wheel_hardware_interface PROPERTIES
 link_directories(${catkin_LIBRARY_DIRS})
 add_dependencies(wheel_hardware_interface ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
-
 add_executable(light_node
   src/light.cpp
 )
@@ -101,3 +101,13 @@ target_link_libraries(light_node
 )
 link_directories(${catkin_LIBRARY_DIRS})
 add_dependencies(light_node ${${PROJECT_NAME}_EXPORTED_TARGETS})
+
+add_executable(servo_node
+  src/servo.cpp
+)
+target_link_libraries(servo_node
+  ${catkin_LIBRARIES}
+  JetsonGPIO::JetsonGPIO
+)
+link_directories(${catkin_LIBRARY_DIRS})
+add_dependencies(servo_node ${${PROJECT_NAME}_EXPORTED_TARGETS})

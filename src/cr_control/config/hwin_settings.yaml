@@ -1,3 +1,8 @@
+cuberover:
+  config:
+    light_pin: 7 # board pin number for the relay control of the light
+    pwm_pin: 15
+
 wheel_hwin_settings:
   debug_mode:           False
   send_command_retries: 3
