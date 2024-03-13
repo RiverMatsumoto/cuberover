@@ -50,7 +50,7 @@ WheelHardwareInterface::WheelHardwareInterface(ros::NodeHandle* nh, WheelHwinSet
 
     clock_gettime(CLOCK_MONOTONIC, &last_time);
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 5; i++)
         cmd[i] = vel[i] = pos[i] = eff[i] = 0;
 }
 
@@ -64,6 +64,12 @@ void WheelHardwareInterface::writeToWheels(Roboclaw *rb)
     }
 
     // check that roboclaws are on before sending commands
+    if (cmd > 0)
+        rb->ForwardM1(wheelSettings->linearActuatorAddress, 126);
+    else if (cmd < 0)
+        rb->BackwardM1(wheelSettings->linearActuatorAddress, 126);
+    else
+        rb->ForwardM1(wheelSettings->linearActuatorAddress, 0);
 
     // need to divide cmd by 10 because diff drive controller 
     // multiplies topic input by 10 for some reason
@@ -306,6 +312,10 @@ void WheelHardwareInterface::registerStateHandlers()
         wheelSettings->leftWheelNames[1], &pos[3], &vel[3], &eff[3]);
     jointStateInterface.registerHandle(wheelLeftBack);
 
+    hardware_interface::JointStateHandle linearActuator(
+        "joint_linear_actuator", &pos[4], &vel[4], &eff[4]);
+    jointStateInterface.registerHandle(linearActuator);
+
     registerInterface(&jointStateInterface);
 }
 void WheelHardwareInterface::registerJointVelocityHandlers()
@@ -326,6 +336,10 @@ void WheelHardwareInterface::registerJointVelocityHandlers()
     hardware_interface::JointHandle wheelLeftBack(
         jointStateInterface.getHandle(wheelSettings->leftWheelNames[1]), &cmd[3]);
     velocityJointInterface.registerHandle(wheelLeftBack);
+
+    hardware_interface::JointHandle linearActuator(
+        jointStateInterface.getHandle("joint_linear_actuator"), &cmd[4]);
+    velocityJointInterface.registerHandle(linearActuator);
 
     registerInterface(&velocityJointInterface);
 }

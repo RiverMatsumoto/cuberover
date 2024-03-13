@@ -3,7 +3,7 @@
     <rosparam command="load" file="$(find cr_control)/config/hwin_settings.yaml"/>
     <include file="$(find teleop_twist_joy)/launch/teleop.launch">
         <arg name="joy_config" value="xbox"/>
-        <remap from="/cmd_vel" to="/cr_velocity_controller/cmd_vel"/>
     </include>
     <node name="controls_node" pkg="cr_control" type="joy_controls.py" output="screen"/>
+
 </launch>

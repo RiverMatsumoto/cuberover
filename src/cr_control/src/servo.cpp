@@ -39,7 +39,7 @@ int main(int argc, char **argv)
 
     servo_service = nh.advertiseService("servo_state", servo_state_service_cb);
     ros::Subscriber servo_sub = nh.subscribe("cuberover/servo_angle", 5, servo);
-    ROS_INFO("Started servo node. Waiting for Float64 messages at topic /servo_node/servo_angle");
+    ROS_INFO("Started servo node. Waiting for Float64 messages at topic /cuberover/servo_angle");
     ros::spin();
     p->ChangeDutyCycle(20);
     usleep(50000);

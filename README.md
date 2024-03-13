@@ -14,6 +14,13 @@ Hardware used:
 ZED SDK
 ROS
 
+## Initial Setup
+
+run `cr_init_setup.bash` to set up permissions on the UART pins
+
+Remove ${cbootargs} argument from the APPEND line in /boot/extlinux/extlinux.conf
+If you can't figure out how to enable UART1 follow instructions at [https://www.codeinsideout.com/projects/lidar-mapping-poc/rover/#uart1]
+
 ## Building/compiling the workspace
 
 ```

@@ -12,10 +12,11 @@ wheel_hwin_settings:
   left_wheel:           ['joint_left_front_wheel', 'joint_left_back_wheel']
   right_addr:           [ 128, 129 ] # note: implement
   left_addr:            [ 128, 129 ] # note: implement
-  use_imu0:             True
+  linear_actuator_addr: 130
+  use_imu0:             False
   use_imu1:             False
   motor_data:
-    encoderTicks_per_revolution: 17700.624
+    encoderTicks_per_revolution: 17700.624 # or 8850.312
 
 roboclaw_settings:
   serial_port:          "/dev/ttyTHS0"
