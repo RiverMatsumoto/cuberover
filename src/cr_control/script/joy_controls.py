@@ -5,17 +5,27 @@ import rospy
 from std_msgs.msg import Empty, Float64
 from sensor_msgs.msg import Joy
 
+xbox_btn_names = ('a', 'b', 'y', 'x', 'lb', 'rb', 'back', 'start', 'power', 'btn_stick_left', 'btn_stick_right')
+bitdo_btn_names = ('a', 'b', 'empty' 'x', 'y', 'empty', 'lb', 'rb', 'lt', 'rt', 'back', 'start', 'power', 'btn_stick_left', 'btn_stick_right')
+
 class JoyControls:
     def __init__(self):
         rospy.init_node("joy_controls_node")
         rospy.loginfo("started joy controls")
         self.toggle_light_pub = rospy.Publisher("cuberover/toggle_light", Empty, queue_size=5)
         self.servo_pub = rospy.Publisher("cuberover/servo_angle", Float64, queue_size=5)
-        self.prev_buttons = tuple([0] * 11)
-        self.prev_dpad = tuple([0] * 2)
+        self.prev_buttons = tuple([0] * 20)
+        self.prev_dpad = tuple([0] * 10)
         self.servo_angle = 0
-        self.btn_names = ('a', 'b', 'x', 'y', 'lb', 'rb', 'back', 'start', 'power', 'btn_stick_left', 'btn_stick_right')
-        self.axes_names = ('left_x', 'left_y', 'right_x', 'right_y', 'rt', 'lt', 'dpad_x', 'dpad_y')
+
+        controller = rospy.get_param('cuberover/config/controller_type')
+        if controller == '8bitdo':
+            self.btn_names = ('a', 'b', 'empty' 'x', 'y', 'empty', 'lb', 'rb', 'lt', 'rt', 'back', 'start', 'power', 'btn_stick_left', 'btn_stick_right')
+            self.axes_names = ('left_x', 'left_y', 'right_x', 'right_y', 'rt', 'lt', 'dpad_x', 'dpad_y')
+        elif controller == 'xbox':
+            self.btn_names = ('a', 'b', 'x', 'y', 'lb', 'rb', 'back', 'start', 'power', 'btn_stick_left', 'btn_stick_right')
+            self.axes_names = ('left_x', 'left_y', 'right_x', 'right_y', 'rt', 'lt', 'dpad_x', 'dpad_y')
+            
         rospy.Subscriber("joy", Joy, self.joy_callback, queue_size=10)
         rospy.spin()
 
@@ -28,10 +38,7 @@ class JoyControls:
         axes = dict(zip(self.axes_names, msg.axes))
         dpad_started = dict(zip(self.axes_names[6:], (dpad_temp[0] != 0 and dpad_temp[1] == 0 for dpad_temp in zip(msg.axes[6:], self.prev_dpad))))
         if started['a']:
-            rospy.loginfo('A started')
             self.toggle_light_pub.publish(Empty())
-        if released['a']:
-            rospy.loginfo('A released')
         if dpad_started['dpad_y']:
             if dpad['dpad_y'] > 0:
                 self.servo_pub.publish(Float64(90.0))

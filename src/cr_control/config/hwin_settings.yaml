@@ -2,6 +2,7 @@ cuberover:
   config:
     light_pin: 7 # board pin number for the relay control of the light
     pwm_pin: 15
+    controller_type: '8bitdo'
 
 wheel_hwin_settings:
   debug_mode:           False
