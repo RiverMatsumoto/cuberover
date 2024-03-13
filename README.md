@@ -33,6 +33,8 @@ source ./devel/setup.bash
 
 ## Launching specific components of cuberover
 
+Refer to [https://docs.ros.org/en/jade/api/robot_upstart/html/] for launching launch files on boot
+
 ##### Motor/Wheel Controls and IMU
 
 WIP
