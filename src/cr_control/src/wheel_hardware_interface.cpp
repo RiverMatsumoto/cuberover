@@ -21,6 +21,7 @@ SOFTWARE. */
 #include <string>
 #include <math.h>
 #include <cstdlib>
+#include <JetsonGPIO.h>
 // ros messages
 #include <std_msgs/Int32.h>
 #include <std_msgs/Float64.h>
@@ -34,6 +35,10 @@ WheelHardwareInterface::WheelHardwareInterface(ros::NodeHandle* nh, WheelHwinSet
     this->nodeHandle = nh;
     roverDataPub = nh->advertise<cr_control::wheel_data>("wheel/data", 1000);
     test = nh->advertise<std_msgs::Float64>("WheelVelocity", 1000);
+
+    GPIO::setmode(GPIO::BOARD);
+    GPIO::setup(wheelSettings->in1_pin, GPIO::OUT, GPIO::LOW);
+    GPIO::setup(wheelSettings->in2_pin, GPIO::OUT, GPIO::LOW);
 
     // store and calibrate imu
     // 0x28 is the default address for the imu
@@ -276,6 +281,35 @@ void WheelHardwareInterface::driveWithSpeed(Roboclaw *rb)
     } else {
         zeroCmdVelCount = 0;  // reset counter
         cmd[0] = cmd[1] = cmd[2] = cmd[3] = 0;
+    }
+}
+
+void WheelHardwareInterface::linearActuator(int8_t la_cmd)
+{
+    ROS_INFO_STREAM("msg: " << int(la_cmd));
+    if (la_cmd > 0)
+    {
+        // forward
+        if (in1_pin_state != 1)
+            GPIO::output(wheelSettings->in1_pin, 1);
+        if (in2_pin_state != 0)
+            GPIO::output(wheelSettings->in2_pin, 0);
+    }
+    else if (la_cmd < 0)
+    {
+        // backwards
+        if (in1_pin_state != 0)
+            GPIO::output(wheelSettings->in1_pin, 0);
+        if (in2_pin_state != 1)
+            GPIO::output(wheelSettings->in2_pin, 1);
+    }
+    else
+    {
+        // stop
+        if (in1_pin_state != 0)
+            GPIO::output(wheelSettings->in1_pin, 0);
+        if (in2_pin_state != 0)
+            GPIO::output(wheelSettings->in2_pin, 0);
     }
 }
 

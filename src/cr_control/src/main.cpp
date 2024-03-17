@@ -1,12 +1,19 @@
 #include <cr_control/wheel_hardware_interface.h>
-#include <cr_control/linear_actuator.h>
+#include <std_msgs/Int8.h>
 #include <vector>
 #include <string>
 #include <math.h>
 #include <cstdlib>
 
-void GetYamlParameters(ros::NodeHandle*, WheelHwinSettings*, RoboclawSettings*, LinearActuatorSettings*);
+void GetYamlParameters(ros::NodeHandle*, WheelHwinSettings*, RoboclawSettings*);
 bool validateSettingsAndLogErrors(WheelHwinSettings*);
+
+WheelHardwareInterface *hwin_ptr;
+
+void linearActuator(const std_msgs::Int8& msg)
+{
+    hwin_ptr->linearActuator(msg.data);
+}
 
 int main(int argc, char **argv)
 {
@@ -19,18 +26,17 @@ int main(int argc, char **argv)
 
     ROS_INFO("Getting yaml parameters for wheel hardware interface settings");
     WheelHwinSettings wheelSettings;
-    LinearActuatorSettings laSettings;
     RoboclawSettings roboclawSettings;
-    GetYamlParameters(&nh, &wheelSettings, &roboclawSettings, &laSettings);
+    GetYamlParameters(&nh, &wheelSettings, &roboclawSettings);
 
     ROS_INFO("Initializing wheel hardware interface");
     WheelHardwareInterface wheelHwin(&nh, &wheelSettings);
-
-    ROS_INFO("Initializing linear actuator interface");
-    LinearActuatorHwin laHwin(&nh, laSettings);
+    hwin_ptr = &wheelHwin;
 
     ROS_INFO("Initializing controller manager");
-    controller_manager::ControllerManager cm(&wheelHwin);
+    controller_manager::ControllerManager cmWheel(&wheelHwin);
+
+    ros::Subscriber linear_actuator_sub = nh.subscribe("cuberover/linear_actuator", 10, linearActuator);
 
     ROS_INFO("Initializing roboclaw interface");
     Roboclaw roboclaw(&roboclawSettings);
@@ -38,11 +44,9 @@ int main(int argc, char **argv)
 
     while (ros::ok()) 
     {
-        // wheelHwin.readFromWheels(&roboclaw);
-        // laHwin.read(&roboclaw);
-        cm.update(wheelHwin.get_time(), wheelHwin.get_period());
+        wheelHwin.readFromWheels(&roboclaw);
+        cmWheel.update(wheelHwin.get_time(), wheelHwin.get_period());
         wheelHwin.writeToWheels(&roboclaw);
-        laHwin.write(&roboclaw);
         rate.sleep();
     }
     
@@ -56,8 +60,7 @@ int main(int argc, char **argv)
 
 void GetYamlParameters(ros::NodeHandle* nh, 
     WheelHwinSettings *wheelSettings, 
-    RoboclawSettings *roboclawSettings, 
-    LinearActuatorSettings * laSettings) 
+    RoboclawSettings *roboclawSettings) 
 {
 
     for (int i = 0; i < 2; i++) {
@@ -82,8 +85,8 @@ void GetYamlParameters(ros::NodeHandle* nh,
     nh->getParam("/wheel_hwin_settings/right_wheel", rightWheelNames);
     nh->getParam("/wheel_hwin_settings/use_imu0", wheelSettings->use_imu0);
     nh->getParam("/wheel_hwin_settings/use_imu1", wheelSettings->use_imu1);
-
-    nh->getParam("linear_actuator_settings/roboclaw_address", laSettings->roboclaw_address);
+    nh->getParam("/wheel_hwin_settings/in1_pin", wheelSettings->in1_pin);
+    nh->getParam("/wheel_hwin_settings/in2_pin", wheelSettings->in2_pin);
 
     for (int i = 0; i < 2; i++) {
         // copy ros_params settings into wheel settings struct

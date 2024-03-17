@@ -28,6 +28,8 @@ struct WheelHwinSettings
     float encoderTicksPerRevolution;
     float revolutionsPerEncoderTick;
     float maxEncoderSpeed;
+    int in1_pin;
+    int in2_pin;
 };
 
 //might need serial to send commands to the hardware
@@ -38,6 +40,7 @@ public:
     ~WheelHardwareInterface();
     void writeToWheels(Roboclaw*);
     void readFromWheels(Roboclaw*);
+    void linearActuator(int8_t direction);
 
     ros::Time get_time();
     ros::Duration get_period();
@@ -75,6 +78,8 @@ private:
     ros::Publisher roverDataPub;
     ros::Publisher test;
 
+    int in1_pin_state = 0;
+    int in2_pin_state = 0;
     // imu for gathering linear acceleration and absolute orientation
     BNO055 imu0 = BNO055(-1, BNO055_ADDRESS_A, 7);
     BNO055 imu1 = BNO055(0, BNO055_ADDRESS_B, 7);

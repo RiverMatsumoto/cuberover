@@ -18,6 +18,8 @@ wheel_hwin_settings:
   motor_data:
     encoderTicks_per_revolution: 17700.624 
     max_encoder_speed: 6000.0
+  in1_pin: 31
+  in2_pin: 29
 
 linear_acutator_settings:
   roboclaw_address:     130

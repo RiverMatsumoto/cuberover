@@ -81,12 +81,14 @@ link_directories(${catkin_LIBRARY_DIRS})
 add_executable(wheel_hardware_interface 
   src/main.cpp
   src/wheel_hardware_interface.cpp 
-  src/linear_actuator.cpp
   src/roboclaw.cpp
   src/BNO055.cpp
   include/cr_control/I2C/src/I2C.cpp
 )
-target_link_libraries(wheel_hardware_interface ${catkin_LIBRARIES})
+target_link_libraries(wheel_hardware_interface 
+  ${catkin_LIBRARIES}
+  JetsonGPIO::JetsonGPIO
+)
 set_target_properties(wheel_hardware_interface PROPERTIES 
     LINKER_LANGUAGE CXX
 )

@@ -2,7 +2,7 @@
 
 from copy import deepcopy
 import rospy
-from std_msgs.msg import Empty, Float64
+from std_msgs.msg import Empty, Float64, Int8
 from sensor_msgs.msg import Joy
 
 xbox_btn_names = ('a', 'b', 'y', 'x', 'lb', 'rb', 'back', 'start', 'power', 'btn_stick_left', 'btn_stick_right')
@@ -14,6 +14,7 @@ class JoyControls:
         rospy.loginfo("started joy controls")
         self.toggle_light_pub = rospy.Publisher("cuberover/toggle_light", Empty, queue_size=5)
         self.servo_pub = rospy.Publisher("cuberover/servo_angle", Float64, queue_size=5)
+        self.la_pub = rospy.Publisher("cuberover/linear_actuator", Int8, queue_size=5)
         self.prev_buttons = tuple([0] * 20)
         self.prev_dpad = tuple([0] * 10)
         self.servo_angle = 0
@@ -38,8 +39,16 @@ class JoyControls:
         axes = dict(zip(self.axes_names, msg.axes))
         dpad_started = dict(zip(self.axes_names[6:], (dpad_temp[0] != 0 and dpad_temp[1] == 0 for dpad_temp in zip(msg.axes[6:], self.prev_dpad))))
         if started['a']:
-            rospy.loginfo("test")
             self.toggle_light_pub.publish(Empty())
+        if pressed['b']:
+            if axes['left_y'] > 0:
+                self.la_pub.publish(Int8(1))
+            elif axes['left_y'] < 0:
+                self.la_pub.publish(Int8(-1))
+            else:
+                self.la_pub.publish(Int8(0))
+        else:
+            self.la_pub.publish(Int8(0))
         if dpad_started['dpad_y']:
             if dpad['dpad_y'] > 0:
                 self.servo_pub.publish(Float64(90.0))
