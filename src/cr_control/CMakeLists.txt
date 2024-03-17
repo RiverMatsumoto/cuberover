@@ -81,6 +81,7 @@ link_directories(${catkin_LIBRARY_DIRS})
 add_executable(wheel_hardware_interface 
   src/main.cpp
   src/wheel_hardware_interface.cpp 
+  src/linear_actuator.cpp
   src/roboclaw.cpp
   src/BNO055.cpp
   include/cr_control/I2C/src/I2C.cpp

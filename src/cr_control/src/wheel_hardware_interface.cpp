@@ -179,32 +179,53 @@ void WheelHardwareInterface::sendCommandToWheels(Roboclaw* rb)
     scaleCommands();
 
     // prevent zero velocity spamming from ros_control
-    if (zeroCmdVelCount <= wheelSettings->maxRetries) {
+    // if (zeroCmdVelCount <= wheelSettings->maxRetries) {
+        ROS_INFO_STREAM("cmd 0: " << cmd[0]);
+        ROS_INFO_STREAM("cmd 1: " << cmd[1]);
+        ROS_INFO_STREAM("cmd 2: " << cmd[2]);
+        ROS_INFO_STREAM("cmd 3: " << cmd[3]);
         // if positive, move motors forward. if negative, move backwards
-        if (cmd[0] >= 0)  // right_front
-            rb->ForwardM2(0x80, cmdToSend[0]);
+        if (cmd[0] > 0)  // right_front
+            rb->ForwardM2(128, cmdToSend[0]);
+        else if (cmd[0] < 0)
+            rb->BackwardM2(128, cmdToSend[0]);
         else
-            rb->BackwardM2(0x80, cmdToSend[0]);
+            rb->ForwardM2(128, 1);
 
-        if (cmd[1] >= 0)  // right_back
-            rb->ForwardM2(0x81, cmdToSend[1]);
+        if (cmd[1] > 0)  // right_back
+            rb->ForwardM2(129, cmdToSend[1]);
+        else if (cmd[1] < 0)  // right_back
+            rb->BackwardM2(129, cmdToSend[1]);
         else
-            rb->BackwardM2(0x81, cmdToSend[1]);
+            rb->ForwardM2(129, 1);
 
-        if (cmd[2] >= 0)  // left_front
-            rb->ForwardM1(0x80, cmdToSend[2]);
+        if (cmd[2] > 0)  // left_front
+            rb->ForwardM1(128, cmdToSend[2]);
+        else if (cmd[2] < 0)  // left_front
+            rb->BackwardM1(128, cmdToSend[2]);
         else
-            rb->BackwardM1(0x80, cmdToSend[2]);
+            rb->ForwardM1(128, 1);
 
-        if (cmd[3] >= 0)  // left_back
-            rb->ForwardM1(0x81, cmdToSend[3]);
+        if (cmd[3] > 0)  // left_back
+        {
+            ROS_INFO("Forward command");
+            rb->ForwardM1(129, cmdToSend[3]);
+        }
+        else if (cmd[3] < 0)  // left_back
+        {
+            ROS_INFO("Backwards command");
+            rb->BackwardM1(129, cmdToSend[3]);
+        }
         else
-            rb->BackwardM1(0x81, cmdToSend[3]);
+        {
+            ROS_INFO("Zero command");
+            rb->ForwardM1(129, 1);
+        }
 
-    }
+    // }
     // if any of the cmd_vel are zero, increment counter
 
-    if (cmd[0] == 0 || cmd[1] == 0 || cmd[2] == 0 ||
+    if (cmd[0] == 0 && cmd[1] == 0 && cmd[2] == 0 &&
         cmd[3] == 0) {
         zeroCmdVelCount++;
     } else {
@@ -218,7 +239,7 @@ void WheelHardwareInterface::driveWithSpeed(Roboclaw *rb)
     int32_t cmd_to_send[4];
     for (int i = 0; i < 4; i++)
     {
-        cmd_to_send[i] = revolutionsToEncoderCount(cmd[i]);
+        cmd_to_send[i] = cmd[i] * wheelSettings->maxEncoderSpeed;
     }
     // ROS_INFO_STREAM("cmd[0]: " << cmd[0]);
     // ROS_INFO_STREAM("cmd_to_send[0]: " << cmd_to_send[0]);
@@ -232,9 +253,9 @@ void WheelHardwareInterface::driveWithSpeed(Roboclaw *rb)
     // ROS_INFO_STREAM("cmd 3: " << cmd_to_send[3]);
     
     if (cmd_to_send[0] == 0 &&
-        cmd_to_send[0] == 0 &&
-        cmd_to_send[0] == 0 &&
-        cmd_to_send[0] == 0)
+        cmd_to_send[1] == 0 &&
+        cmd_to_send[2] == 0 &&
+        cmd_to_send[3] == 0)
     {
         rb->DriveSpeedAccelM2(128, (int)(encoderTicksPerRev / 2), 0);
         rb->DriveSpeedAccelM2(129, (int)(encoderTicksPerRev / 2), 0);
@@ -249,7 +270,13 @@ void WheelHardwareInterface::driveWithSpeed(Roboclaw *rb)
         rb->DriveSpeedAccelM1(129, (int)(encoderTicksPerRev / 1.5), cmd_to_send[3]);
     }
 
-    cmd[0] = cmd[1] = cmd[2] = cmd[3] = 0;
+    if (cmd[0] == 0 && cmd[1] == 0 && cmd[2] == 0 &&
+        cmd[3] == 0) {
+        zeroCmdVelCount++;
+    } else {
+        zeroCmdVelCount = 0;  // reset counter
+        cmd[0] = cmd[1] = cmd[2] = cmd[3] = 0;
+    }
 }
 
 void WheelHardwareInterface::scaleCommands()
@@ -257,7 +284,7 @@ void WheelHardwareInterface::scaleCommands()
     // TODO scaled the commands from 0-126 to send to roboclaw
     for (int i = 0; i < 4; i++)
     {
-        double res = (fabs(cmd[i]) / 16.667) * wheelSettings->maxEffortValue;
+        double res = fabs(cmd[i]) * wheelSettings->maxEffortValue;
 
         if (res >= wheelSettings->maxEffortValue)
             cmdToSend[i] = wheelSettings->maxEffortValue;
@@ -312,12 +339,9 @@ void WheelHardwareInterface::registerStateHandlers()
         wheelSettings->leftWheelNames[1], &pos[3], &vel[3], &eff[3]);
     jointStateInterface.registerHandle(wheelLeftBack);
 
-    hardware_interface::JointStateHandle linearActuator(
-        "joint_linear_actuator", &pos[4], &vel[4], &eff[4]);
-    jointStateInterface.registerHandle(linearActuator);
-
     registerInterface(&jointStateInterface);
 }
+
 void WheelHardwareInterface::registerJointVelocityHandlers()
 {
     ROS_INFO("Registering Velocity Joint Interface");
@@ -336,10 +360,6 @@ void WheelHardwareInterface::registerJointVelocityHandlers()
     hardware_interface::JointHandle wheelLeftBack(
         jointStateInterface.getHandle(wheelSettings->leftWheelNames[1]), &cmd[3]);
     velocityJointInterface.registerHandle(wheelLeftBack);
-
-    hardware_interface::JointHandle linearActuator(
-        jointStateInterface.getHandle("joint_linear_actuator"), &cmd[4]);
-    velocityJointInterface.registerHandle(linearActuator);
 
     registerInterface(&velocityJointInterface);
 }

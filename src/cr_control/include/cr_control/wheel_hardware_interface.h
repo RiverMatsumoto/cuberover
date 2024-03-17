@@ -19,7 +19,7 @@ struct WheelHwinSettings
     int leftWheelRoboclawAddresses[2]; // Corresponding wheel to roboclaw address
     int rightWheelRoboclawAddresses[2];
     int linearActuatorAddress;
-    uint8_t maxEffortValue = 126;
+    uint8_t maxEffortValue = 125;
     int rosLoopRate = 10;
     int maxRetries = 3;
     bool debugMode = false;
@@ -27,6 +27,7 @@ struct WheelHwinSettings
     bool use_imu1 = false;
     float encoderTicksPerRevolution;
     float revolutionsPerEncoderTick;
+    float maxEncoderSpeed;
 };
 
 //might need serial to send commands to the hardware
@@ -63,12 +64,12 @@ private:
     struct timespec current_time;
     int zeroCmdVelCount;
     // For reading commands sent from the controller
-    double cmd[5];
-    uint8_t cmdToSend[5];
+    double cmd[4];
+    uint8_t cmdToSend[4];
     // for sending data relating to the joints
-    double pos[5];
-    double vel[5];
-    double eff[5];
+    double pos[4];
+    double vel[4];
+    double eff[4];
     static constexpr double BILLION = 1000000000.0; // nanoseconds to seconds
     ros::NodeHandle* nodeHandle;
     ros::Publisher roverDataPub;

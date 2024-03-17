@@ -1,10 +1,11 @@
 #include <cr_control/wheel_hardware_interface.h>
+#include <cr_control/linear_actuator.h>
 #include <vector>
 #include <string>
 #include <math.h>
 #include <cstdlib>
 
-void GetYamlParameters(ros::NodeHandle*, WheelHwinSettings*, RoboclawSettings*);
+void GetYamlParameters(ros::NodeHandle*, WheelHwinSettings*, RoboclawSettings*, LinearActuatorSettings*);
 bool validateSettingsAndLogErrors(WheelHwinSettings*);
 
 int main(int argc, char **argv)
@@ -18,11 +19,15 @@ int main(int argc, char **argv)
 
     ROS_INFO("Getting yaml parameters for wheel hardware interface settings");
     WheelHwinSettings wheelSettings;
+    LinearActuatorSettings laSettings;
     RoboclawSettings roboclawSettings;
-    GetYamlParameters(&nh, &wheelSettings, &roboclawSettings);
+    GetYamlParameters(&nh, &wheelSettings, &roboclawSettings, &laSettings);
 
     ROS_INFO("Initializing wheel hardware interface");
     WheelHardwareInterface wheelHwin(&nh, &wheelSettings);
+
+    ROS_INFO("Initializing linear actuator interface");
+    LinearActuatorHwin laHwin(&nh, laSettings);
 
     ROS_INFO("Initializing controller manager");
     controller_manager::ControllerManager cm(&wheelHwin);
@@ -33,9 +38,11 @@ int main(int argc, char **argv)
 
     while (ros::ok()) 
     {
-        wheelHwin.readFromWheels(&roboclaw);
+        // wheelHwin.readFromWheels(&roboclaw);
+        // laHwin.read(&roboclaw);
         cm.update(wheelHwin.get_time(), wheelHwin.get_period());
         wheelHwin.writeToWheels(&roboclaw);
+        laHwin.write(&roboclaw);
         rate.sleep();
     }
     
@@ -47,7 +54,11 @@ int main(int argc, char **argv)
     return 0;
 }
 
-void GetYamlParameters(ros::NodeHandle* nh, WheelHwinSettings *wheelSettings, RoboclawSettings *roboclawSettings) {
+void GetYamlParameters(ros::NodeHandle* nh, 
+    WheelHwinSettings *wheelSettings, 
+    RoboclawSettings *roboclawSettings, 
+    LinearActuatorSettings * laSettings) 
+{
 
     for (int i = 0; i < 2; i++) {
         wheelSettings->rightWheelRoboclawAddresses[i] = 0;
@@ -72,6 +83,8 @@ void GetYamlParameters(ros::NodeHandle* nh, WheelHwinSettings *wheelSettings, Ro
     nh->getParam("/wheel_hwin_settings/use_imu0", wheelSettings->use_imu0);
     nh->getParam("/wheel_hwin_settings/use_imu1", wheelSettings->use_imu1);
 
+    nh->getParam("linear_actuator_settings/roboclaw_address", laSettings->roboclaw_address);
+
     for (int i = 0; i < 2; i++) {
         // copy ros_params settings into wheel settings struct
         std::copy(leftWheelNames.begin(), leftWheelNames.end(), wheelSettings->leftWheelNames);
@@ -82,6 +95,7 @@ void GetYamlParameters(ros::NodeHandle* nh, WheelHwinSettings *wheelSettings, Ro
     }
 
     nh->getParam("/wheel_hwin_settings/motor_data/encoderTicks_per_revolution", wheelSettings->encoderTicksPerRevolution);
+    nh->getParam("/wheel_hwin_settings/motor_data/max_encoder_speed", wheelSettings->maxEncoderSpeed);
     wheelSettings->revolutionsPerEncoderTick = 1.0f / wheelSettings->encoderTicksPerRevolution;
 
     bool errorFlag = validateSettingsAndLogErrors(wheelSettings);

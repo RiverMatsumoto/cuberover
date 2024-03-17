@@ -38,12 +38,14 @@ class JoyControls:
         axes = dict(zip(self.axes_names, msg.axes))
         dpad_started = dict(zip(self.axes_names[6:], (dpad_temp[0] != 0 and dpad_temp[1] == 0 for dpad_temp in zip(msg.axes[6:], self.prev_dpad))))
         if started['a']:
+            rospy.loginfo("test")
             self.toggle_light_pub.publish(Empty())
         if dpad_started['dpad_y']:
             if dpad['dpad_y'] > 0:
                 self.servo_pub.publish(Float64(90.0))
             if dpad['dpad_y'] < 0:
                 self.servo_pub.publish(Float64(0.0))
+        
         
         self.prev_dpad = msg.axes[6:]
         self.prev_buttons = msg.buttons
