@@ -21,7 +21,7 @@ class JoyControls:
 
         controller = rospy.get_param('cuberover/config/controller_type')
         if controller == '8bitdo':
-            self.btn_names = ('a', 'b', 'empty' 'x', 'y', 'empty', 'lb', 'rb', 'lt', 'rt', 'back', 'start', 'power', 'btn_stick_left', 'btn_stick_right')
+            self.btn_names = ('a', 'b', 'empty', 'x', 'y', 'empty', 'lb', 'rb', 'lt', 'rt', 'back', 'start', 'power', 'btn_stick_left', 'btn_stick_right')
             self.axes_names = ('left_x', 'left_y', 'right_x', 'right_y', 'rt', 'lt', 'dpad_x', 'dpad_y')
         elif controller == 'xbox':
             self.btn_names = ('a', 'b', 'x', 'y', 'lb', 'rb', 'back', 'start', 'power', 'btn_stick_left', 'btn_stick_right')
@@ -38,7 +38,7 @@ class JoyControls:
         released = dict(zip(self.btn_names, (btn[0] == 0 and btn[1] == 1 for btn in zip(msg.buttons, self.prev_buttons))))
         axes = dict(zip(self.axes_names, msg.axes))
         dpad_started = dict(zip(self.axes_names[6:], (dpad_temp[0] != 0 and dpad_temp[1] == 0 for dpad_temp in zip(msg.axes[6:], self.prev_dpad))))
-        if started['a']:
+        if started['x']:
             self.toggle_light_pub.publish(Empty())
         if pressed['b']:
             if axes['left_y'] > 0:

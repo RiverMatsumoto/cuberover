@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+
+    <include file="$(find ublox_gps)/launch/ublox_device.launch">
+        <arg name="param_file_name" value="zed_f9p"/>
+    </include>
+
+</launch>

@@ -38,8 +38,8 @@ int main(int argc, char **argv)
     GPIO::setup(output_pin, GPIO::OUT, GPIO::LOW);
 
     light_service = nh.advertiseService("light_state", light_service_cb);
-    ros::Subscriber light_sub = nh.subscribe("cuberover/light", 20, light_callback);
-    ros::Subscriber toggle_light_sub = nh.subscribe("cuberover/toggle_light", 20, toggle_light_callback);
+    ros::Subscriber light_sub = nh.subscribe("cuberover/light", 5, light_callback);
+    ros::Subscriber toggle_light_sub = nh.subscribe("cuberover/toggle_light", 5, toggle_light_callback);
     ROS_INFO("Started light node");
     ros::spin();
 

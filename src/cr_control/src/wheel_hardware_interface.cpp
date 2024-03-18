@@ -294,6 +294,8 @@ void WheelHardwareInterface::linearActuator(int8_t la_cmd)
             GPIO::output(wheelSettings->in1_pin, 1);
         if (in2_pin_state != 0)
             GPIO::output(wheelSettings->in2_pin, 0);
+        in1_pin_state = 1;
+        in2_pin_state = 0;
     }
     else if (la_cmd < 0)
     {
@@ -302,6 +304,8 @@ void WheelHardwareInterface::linearActuator(int8_t la_cmd)
             GPIO::output(wheelSettings->in1_pin, 0);
         if (in2_pin_state != 1)
             GPIO::output(wheelSettings->in2_pin, 1);
+        in1_pin_state = 0;
+        in2_pin_state = 1;
     }
     else
     {
@@ -310,6 +314,8 @@ void WheelHardwareInterface::linearActuator(int8_t la_cmd)
             GPIO::output(wheelSettings->in1_pin, 0);
         if (in2_pin_state != 0)
             GPIO::output(wheelSettings->in2_pin, 0);
+        in1_pin_state = 0;
+        in2_pin_state = 0;
     }
 }
 

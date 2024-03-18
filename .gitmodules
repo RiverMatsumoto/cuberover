@@ -14,3 +14,6 @@
 [submodule "src/vicon_bridge"]
 	path = src/vicon_bridge
 	url = https://github.com/ethz-asl/vicon_bridge.git
+[submodule "src/ublox"]
+	path = src/ublox
+	url = https://github.com/KumarRobotics/ublox

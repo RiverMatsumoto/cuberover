@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
-	<include file="$(find cr_description)/launch/cr_description.launch"/>
 	<include file="$(find cr_control)/launch/cr_control.launch"/>
 	<include file="$(find cr_control)/launch/servo.launch"/>
 	<include file="$(find cr_control)/launch/joy.launch"/>
+	<include file="$(find cr_control)/launch/light.launch"/>
 </launch>
