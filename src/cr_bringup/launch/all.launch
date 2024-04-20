@@ -4,4 +4,5 @@
 	<include file="$(find cr_control)/launch/servo.launch"/>
 	<include file="$(find cr_control)/launch/joy.launch"/>
 	<include file="$(find cr_control)/launch/light.launch"/>
+	<include file="$(find cr_control)/launch/gps.launch"/>
 </launch>

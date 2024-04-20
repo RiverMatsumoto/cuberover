@@ -6,8 +6,8 @@ cuberover:
 
 wheel_hwin_settings:
   debug_mode:           False
-  send_command_retries: 3
-  ros_loop_rate:        50
+  send_command_retries: 2
+  ros_loop_rate:        20
   right_wheel:          ['joint_right_front_wheel', 'joint_right_back_wheel']
   left_wheel:           ['joint_left_front_wheel', 'joint_left_back_wheel']
   right_addr:           [ 128, 129 ] # note: implement

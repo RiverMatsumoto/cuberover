@@ -114,3 +114,21 @@ target_link_libraries(servo_node
 )
 link_directories(${catkin_LIBRARY_DIRS})
 add_dependencies(servo_node ${${PROJECT_NAME}_EXPORTED_TARGETS})
+
+add_executable(uart_test
+  src/simple_uart_term.c
+  src/simple_uart.c
+)
+target_link_libraries(uart_test
+  ${catkin_LIBRARIES}
+)
+link_directories(${catkin_LIBRARY_DIRS})
+
+add_executable(test_roboclaw
+  src/roboclaw.cpp
+  src/test_roboclaw.cpp
+)
+target_link_libraries(test_roboclaw
+  ${catkin_LIBRARIES}
+)
+link_directories(${catkin_LIBRARY_DIRS})

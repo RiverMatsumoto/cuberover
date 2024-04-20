@@ -5,7 +5,7 @@
 #include <string>
 #include <unistd.h>
 
-int pwm_pin = 15;
+int pwm_pin = 33;
 double degrees;
 ros::ServiceServer servo_service;
 GPIO::PWM *p;

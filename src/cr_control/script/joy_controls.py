@@ -51,7 +51,7 @@ class JoyControls:
             self.la_pub.publish(Int8(0))
         if dpad_started['dpad_y']:
             if dpad['dpad_y'] > 0:
-                self.servo_pub.publish(Float64(90.0))
+                self.servo_pub.publish(Float64(45.0))
             if dpad['dpad_y'] < 0:
                 self.servo_pub.publish(Float64(0.0))
         
