@@ -31,6 +31,7 @@ add_service_files(
   ServoState.srv
   EncoderCount.srv
   SliderPosition.srv
+  CalibrationService.srv
 )
 
 # Generate added messages and services with any dependencies listed here

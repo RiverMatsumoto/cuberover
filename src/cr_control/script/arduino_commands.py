@@ -8,17 +8,17 @@ import threading
 from time import time_ns, sleep
 from std_msgs.msg import Float32, UInt32, String, Int32, UInt8, Int8
 from cr_control.srv import EncoderCount, EncoderCountRequest, EncoderCountResponse
-from cr_control.srv import SliderPosition, SliderPositionRequest, SliderPositionResponse
+from cr_control.srv import SliderPosition, SliderPositionRequest, SliderPositionResponse, CalibrationService
 
 class SerialHandler:
     def __init__(self, port, baudrate):
         self.serial_port = serial.Serial(port, baudrate)
-        self.serial_port.timeout = 1.0
+        self.serial_port.timeout = 0.5
         self.arm_log_pub = rospy.Publisher('/arm/log', String, queue_size=10)
         self.write_interval = 0.1
         self.msg_queue = []
         self.max_queue_length = 20
-        self.write_thread = threading.Thread(target=self.write_from_queue)
+        self.write_thread = threading.Thread(target=self.threaded_write)
         self.write_thread.daemon = True
         self.write_thread.start()
     
@@ -28,7 +28,10 @@ class SerialHandler:
             self.msg_queue.append(msg)
         rospy.loginfo(self.msg_queue)
     
-    def write_from_queue(self):
+    def threaded_write(self):
+        """
+        don't call this function, it is an infinite loop polling thread
+        """
         while True:
             if len(self.msg_queue) > 0 and self.serial_port.is_open:
                 self.serial_port.write(self.msg_queue.pop(0).encode())
@@ -40,7 +43,7 @@ class SerialHandler:
         self.write(msg)
         # wait for response
         result = ' '
-        while result[0] != '$': # $ indicates data to be read
+        while result != None and result[0] != '$': # $ indicates data to be read
             result = self.serial_port.readline().strip().decode()
             if result == '$hi':
                 continue
@@ -138,6 +141,9 @@ def slider_position_service(req: SliderPositionRequest):
     rospy.loginfo(f'Parsed slider position: steps={position.steps}, millimeters={position.mm}')
     return position
     
+def calibrate_arm_service(req):
+    arduino_serial.write(f'calibrate')
+    return
     
 def encoder_count_service(req: EncoderCountRequest):
     rospy.loginfo(f'Encoder count service called with args: address={req.address}, motor={req.motor}')
@@ -206,7 +212,9 @@ if __name__ == "__main__":
     rospy.Subscriber('/arm/joint4_speed', Float32, joint4_cb, arduino_serial, queue_size=10)
     rospy.Subscriber('/arm/slider', Float32, slider_cb, arduino_serial, queue_size=10)
     rospy.Subscriber('/arm/slider_relative', Float32, slider_relative_cb, arduino_serial, queue_size=10)
-    readEncService = rospy.Service('read_encoder', EncoderCount, encoder_count_service)
+    readEncService = rospy.Service('/arm/read_encoder', EncoderCount, encoder_count_service)
+    sliderPosService = rospy.Service('/arm/slider_position', SliderPosition, slider_position_service)
+    calibrateArmService = rospy.Service('/arm/calibrate_arm', SliderPosition, calibrate_arm_service)
     rospy.spin()
     rospy.loginfo('Closing serial port connection to arduino')
     arduino_serial.close()

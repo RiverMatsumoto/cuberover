@@ -111,12 +111,10 @@ class JoyControls:
             else:
                 self.arm_joint4_speed_pub.publish(Float32(0.0))
         
-        
         self.prev_dpad = msg.axes[6:]
         self.prev_buttons = msg.buttons
         
 def main():
-    
     JoyControls()
 
 if __name__ == "__main__":
