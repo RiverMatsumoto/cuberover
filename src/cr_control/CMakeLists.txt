@@ -29,6 +29,8 @@ add_service_files(
   FILES
   LightState.srv
   ServoState.srv
+  EncoderCount.srv
+  SliderPosition.srv
 )
 
 # Generate added messages and services with any dependencies listed here
