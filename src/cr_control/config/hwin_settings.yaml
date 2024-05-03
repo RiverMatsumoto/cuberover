@@ -1,0 +1,32 @@
+cuberover:
+  config:
+    light_pin: 7 # board pin number for the relay control of the light
+    pwm_pin: 15
+    controller_type: '8bitdo'
+
+wheel_hwin_settings:
+  debug_mode:           False
+  send_command_retries: 2
+  ros_loop_rate:        20
+  right_wheel:          ['joint_right_front_wheel', 'joint_right_back_wheel']
+  left_wheel:           ['joint_left_front_wheel', 'joint_left_back_wheel']
+  right_addr:           [ 128, 129 ] # note: implement
+  left_addr:            [ 128, 129 ] # note: implement
+  linear_actuator_addr: 130
+  use_imu0:             False
+  use_imu1:             False
+  motor_data:
+    encoderTicks_per_revolution: 17700.624 
+    max_encoder_speed: 6000.0
+  in1_pin: 31
+  in2_pin: 29
+
+linear_acutator_settings:
+  roboclaw_address:     130
+
+roboclaw_settings:
+  serial_port:          "/dev/ttyTHS0"
+  send_command_retries: 2
+  encoder_timeout_ms:   5
+  loop_frequency:       50
+  baud_rate:            115200

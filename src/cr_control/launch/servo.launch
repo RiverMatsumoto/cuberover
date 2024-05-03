@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+    <rosparam command="load" file="$(find cr_control)/config/hwin_settings.yaml"/>
+    <node name="servo_node" pkg="cr_control" type="servo_node" output="screen"/>
+</launch>

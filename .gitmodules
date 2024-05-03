@@ -1,0 +1,19 @@
+[submodule "src/zed-ros-wrapper"]
+	path = src/zed-ros-wrapper
+	url = https://github.com/stereolabs/zed-ros-wrapper.git
+
+[submodule "src/cr_control/include/cr_control/I2C"]
+	path = src/cr_control/include/cr_control/I2C
+	url = https://github.com/williamg42/I2C.git
+[submodule "vicon_bridge"]
+	path = src/vicon_bridge
+	url = https://github.com/ethz-asl/vicon_bridge
+[submodule "rosbag_to_csv"]
+	path = src/rosbag_to_csv
+	url = https://github.com/AtsushiSakai/rosbag_to_csv
+[submodule "src/vicon_bridge"]
+	path = src/vicon_bridge
+	url = https://github.com/ethz-asl/vicon_bridge.git
+[submodule "src/ublox"]
+	path = src/ublox
+	url = https://github.com/KumarRobotics/ublox

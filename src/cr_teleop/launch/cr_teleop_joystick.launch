@@ -1,0 +1,17 @@
+<launch>
+
+  <!-- Start joy node -->
+  <node pkg="joy" type="joy_node" name="joy_node" />
+
+  <!-- Start teleop_twist_joy node -->
+  <node pkg="teleop_twist_joy" type="teleop_node" name="cr_teleop_joy" output="screen">
+    <remap from="/cmd_vel" to="/cr_velocity_controller/cmd_vel" />
+    <param name="enable_button" type="int" value="4"/>
+  </node>
+<!--
+    <param name="scale_angular" type="double" value="0.4"/>
+    <param name="scale_linear" type="double" value="0.25"/>
+-->
+
+</launch>
+
